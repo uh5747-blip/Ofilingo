@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OfiLingo - Lección</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { duoGreen: '#58CC02', duoGreenDark: '#58A700', duoBlue: '#1CB0F6', duoBlueDark: '#1899D6', duoRed: '#FF4B4B', duoRedDark: '#EA2B2B', duoYellow: '#FFC800', textMain: '#4B4B4B', textGray: '#AFAFBE', wordBlue: '#2B579A' },
+                    fontFamily: { sans: ['Nunito', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: #fff;
+            color: #4B4B4B;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .active-push:active {
+            transform: translateY(4px);
+            border-bottom-width: 0 !important;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // ===== URL PARAMS =====
+        const params = new URLSearchParams(window.location.search);
+        const MODULE_ID = parseInt(params.get('module')) || 1;
+        const MISSION_ID = parseInt(params.get('mission')) || 1;
+        const PHASE = params.get('phase') || 'theory';
+        const TOOL = params.get('tool') || 'word';
+
+        // ===== ICONS =====
+        const HeartIcon = ({ filled = true }) => <svg width="28" height="28" viewBox="0 0 24 24" fill={filled ? "#FF4B4B" : "#E5E5E5"} stroke={filled ? "#EA2B2B" : "#CCC"} strokeWidth="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>;
+        const StarIcon = ({ size = 32, fill = "#FFC800", stroke = "#D4A600" }) => <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
+
+        // ===== CONTENT BANK =====
+        const CONTENT = {
+            "1": {
+                1: {
+                    theory: [
+                        { title: "¡Bienvenido a Word!", text: "Microsoft Word es el procesador de textos más usado del mundo. Sirve para crear documentos como cartas, informes, y más.", example: "Por ejemplo, puedes escribir una carta para tu abuelita, hacer una tarea del colegio o crear un cuento con dibujos.", tip: "Lo encontrarás en el menú Inicio o buscando 'Word'.", icon: "📝" },
+                        { title: "Las partes de Word", text: "Word tiene: Cinta de opciones (arriba), Área de escritura (centro), Barra de estado (abajo), y Panel de navegación (izquierda).", example: "Imagina que Word es como un escritorio: la Cinta de opciones son tus herramientas (lápices, colores), y el Área de escritura es tu hoja en blanco.", tip: "La Cinta de opciones contiene todas las herramientas.", icon: "🖥️" },
+                        { title: "La Cinta de Opciones", text: "Tiene pestañas: Inicio, Insertar, Diseño, Disposición, Referencias, Correspondencia, Revisar y Vista. Cada una agrupa herramientas relacionadas.", example: "Es como una caja de herramientas con cajones: en 'Inicio' están las más usadas (negrita, tamaño), en 'Insertar' puedes poner fotos y tablas.", tip: "La pestaña Inicio es la que más usarás.", icon: "🎀" }
+                    ], practice: [
+                        { q: "¿Qué es Microsoft Word?", opts: ["Un navegador web", "Un procesador de textos", "Una hoja de cálculo", "Un editor de fotos"], ans: 1, type: "mc" },
+                        { q: "¿Dónde se encuentran las herramientas principales de Word?", opts: ["Barra de estado", "Panel de navegación", "Cinta de opciones", "Área de escritura"], ans: 2, type: "mc" },
+                        { q: "La pestaña 'Inicio' es la que más se usa en Word.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Cuántas pestañas principales tiene la Cinta de opciones?", opts: ["5", "6", "8", "10"], ans: 2, type: "mc" }
+                    ]
+                },
+                2: {
+                    theory: [
+                        { title: "Crear un documento nuevo", text: "Para crear un documento nuevo ve a Archivo > Nuevo > Documento en blanco. También puedes usar el atajo Ctrl+N.", example: "Es como sacar una hoja nueva de tu cuaderno. Presiona Ctrl+N y ¡listo! Tienes una página en blanco para escribir.", tip: "Ctrl+N = Nuevo documento", icon: "📄" },
+                        { title: "Plantillas", text: "Word ofrece plantillas prediseñadas para currículums, cartas, folletos y más. Las encuentras en Archivo > Nuevo.", example: "Si quieres hacer una invitación de cumpleaños, no tienes que empezar de cero. Busca 'invitación' en las plantillas y ya tienes un diseño bonito listo.", tip: "Las plantillas te ahorran mucho tiempo.", icon: "📋" },
+                        { title: "Tu primer texto", text: "Simplemente empieza a escribir. El cursor parpadeante indica dónde aparecerá el texto. Presiona Enter para un nuevo párrafo.", example: "Prueba escribir: 'Hola, me llamo [tu nombre]'. Verás cómo las letras aparecen donde está la rayita parpadeante.", tip: "No presiones Enter al final de cada línea, Word ajusta el texto automáticamente.", icon: "⌨️" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para crear un documento nuevo?", opts: ["Ctrl+S", "Ctrl+N", "Ctrl+O", "Ctrl+P"], ans: 1, type: "mc" },
+                        { q: "Las plantillas se encuentran en Archivo > Nuevo.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué indica el cursor parpadeante?", opts: ["Un error", "Dónde se escribirá el texto", "Que el documento está guardado", "La página actual"], ans: 1, type: "mc" },
+                        { q: "Debes presionar Enter al final de cada línea.", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" }
+                    ]
+                },
+                3: {
+                    theory: [
+                        { title: "Guardar tu trabajo", text: "Guardar es ESENCIAL. Usa Ctrl+S frecuentemente para no perder tu trabajo. La primera vez te pedirá nombre y ubicación.", example: "Imagina que haces un dibujo hermoso pero no lo guardas. Si se va la luz, ¡lo pierdes todo! Con Ctrl+S es como guardar tu dibujo en una caja fuerte.", tip: "Ctrl+S = Guardar. ¡Hazlo cada 5 minutos!", icon: "💾" },
+                        { title: "Guardar vs Guardar Como", text: "'Guardar' (Ctrl+S) actualiza el archivo actual. 'Guardar Como' (F12) crea una copia con otro nombre o en otra ubicación.", example: "'Guardar' es como actualizar tu cuaderno. 'Guardar Como' es como fotocopiar tu tarea y ponerle otro nombre: 'Tarea_versión2'.", tip: "F12 = Guardar Como", icon: "📁" },
+                        { title: "Formatos de archivo", text: "El formato predeterminado es .docx. También puedes guardar como .pdf, .doc (versión antigua), .rtf, y más.", example: "Si tu profe te pide la tarea en PDF, vas a Archivo > Guardar Como y eliges PDF. Así nadie puede editarlo.", tip: ".docx es el formato moderno de Word.", icon: "📄" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para guardar?", opts: ["Ctrl+G", "Ctrl+S", "Ctrl+A", "Alt+S"], ans: 1, type: "mc" },
+                        { q: "¿Qué hace 'Guardar Como'?", opts: ["Elimina el archivo", "Crea una copia con otro nombre", "Imprime el documento", "Cierra Word"], ans: 1, type: "mc" },
+                        { q: "El formato predeterminado de Word es .doc", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" },
+                        { q: "¿Cuál es el atajo de Guardar Como?", opts: ["Ctrl+S", "F11", "F12", "Ctrl+Shift+S"], ans: 2, type: "mc" }
+                    ]
+                },
+                4: {
+                    theory: [
+                        { title: "Abrir documentos", text: "Para abrir un archivo existente usa Ctrl+O o ve a Archivo > Abrir. Puedes abrir desde tu PC, OneDrive o archivos recientes.", example: "¿Hiciste una tarea ayer y quieres seguir hoy? Presiona Ctrl+O, busca tu archivo 'Mi_tarea.docx' y haz doble clic para abrirlo.", tip: "Ctrl+O = Open (Abrir)", icon: "📂" },
+                        { title: "Archivos recientes", text: "Word recuerda los últimos documentos que abriste. Los encuentras en Archivo > Recientes. ¡Muy útil!", example: "Al abrir Word, verás una lista de tus últimos archivos. Es como el historial de tus videos favoritos en YouTube.", tip: "Los recientes aparecen al iniciar Word.", icon: "🕐" },
+                        { title: "Múltiples documentos", text: "Puedes tener varios documentos abiertos a la vez. Usa Alt+Tab para cambiar entre ellos o la pestaña Vista > Cambiar ventanas.", example: "Puedes tener abierta tu tarea de matemáticas Y tu cuento al mismo tiempo. Con Alt+Tab saltas de uno a otro.", tip: "Alt+Tab cambia entre ventanas abiertas.", icon: "🪟" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para abrir un archivo?", opts: ["Ctrl+A", "Ctrl+O", "Ctrl+N", "Ctrl+F"], ans: 1, type: "mc" },
+                        { q: "Los archivos recientes aparecen en Archivo > Recientes.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué atajo cambias entre ventanas abiertas?", opts: ["Ctrl+Tab", "Alt+F4", "Alt+Tab", "Ctrl+W"], ans: 2, type: "mc" },
+                        { q: "Solo puedes tener un documento abierto a la vez.", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" }
+                    ]
+                },
+                5: {
+                    theory: [
+                        { title: "¡Checkpoint: Repaso!", text: "Has aprendido los fundamentos: la interfaz, crear, guardar y abrir documentos. ¡Es hora de demostrar lo que sabes!", example: "Ya sabes abrir Word, crear un documento nuevo, escribir texto, guardarlo y volver a abrirlo. ¡Eso es genial!", tip: "Repasa los atajos: Ctrl+N, Ctrl+S, Ctrl+O", icon: "🏁" },
+                        { title: "Atajos clave", text: "Ctrl+N = Nuevo, Ctrl+S = Guardar, F12 = Guardar Como, Ctrl+O = Abrir. Estos son tus herramientas esenciales.", example: "Piensa en los atajos como poderes secretos: Ctrl+N crea una hoja mágica, Ctrl+S la protege, y Ctrl+O la trae de vuelta.", tip: "Practica estos atajos hasta que sean automáticos.", icon: "⌨️" }
+                    ], practice: [
+                        { q: "Ctrl+N sirve para...", opts: ["Nuevo documento", "Guardar", "Negrita", "Abrir"], ans: 0, type: "mc" },
+                        { q: "F12 abre Guardar Como.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Dónde están las herramientas de Word?", opts: ["Barra de tareas", "Cinta de opciones", "Escritorio", "Panel de control"], ans: 1, type: "mc" },
+                        { q: "Ctrl+O sirve para abrir archivos.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "El formato moderno de Word es:", opts: [".doc", ".txt", ".docx", ".pdf"], ans: 2, type: "mc" }
+                    ]
+                },
+                6: {
+                    theory: [
+                        { title: "Seleccionar texto", text: "Para editar texto primero debes seleccionarlo. Haz clic y arrastra, o usa el teclado con Shift + flechas.", example: "Quieres poner en negrita la palabra 'importante'. Haz doble clic sobre ella y se pondrá azul (seleccionada). ¡Ahora puedes cambiarla!", tip: "Doble clic selecciona una palabra, triple clic un párrafo.", icon: "✏️" },
+                        { title: "Seleccionar todo", text: "Ctrl+A selecciona todo el texto del documento. Muy útil para cambiar la fuente de todo el documento.", example: "Si quieres cambiar toda la letra de tu tarea a Comic Sans, presiona Ctrl+A (todo se pone azul) y cambia la fuente. ¡Listo!", tip: "Ctrl+A = Seleccionar todo", icon: "📑" },
+                        { title: "Selección múltiple", text: "Mantén Ctrl presionado y haz clic para seleccionar múltiples fragmentos de texto no consecutivos.", example: "Quieres poner en negrita tu nombre en 3 lugares diferentes. Mantén Ctrl, haz clic en cada nombre, y luego presiona Ctrl+B. ¡Todos quedan en negrita!", tip: "Ctrl+clic = Selección múltiple", icon: "🎯" }
+                    ], practice: [
+                        { q: "¿Cómo seleccionas una sola palabra?", opts: ["Triple clic", "Clic derecho", "Doble clic", "Ctrl+A"], ans: 2, type: "mc" },
+                        { q: "Ctrl+A selecciona todo el documento.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué tecla mantienes para selección múltiple?", opts: ["Shift", "Alt", "Ctrl", "Tab"], ans: 2, type: "mc" },
+                        { q: "Triple clic selecciona un párrafo.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" }
+                    ]
+                },
+                7: {
+                    theory: [
+                        { title: "Copiar y Pegar", text: "Copiar (Ctrl+C) duplica el texto seleccionado. Pegar (Ctrl+V) lo coloca donde está el cursor. ¡El dúo más famoso!", example: "Escribiste tu dirección una vez. En vez de escribirla de nuevo, selecciónala, Ctrl+C, ve al otro lugar, y Ctrl+V. ¡Aparece igual!", tip: "Ctrl+C = Copiar, Ctrl+V = Pegar", icon: "📋" },
+                        { title: "Pegado especial", text: "Ctrl+Shift+V pega sin formato (solo texto plano). Útil cuando copias de internet y no quieres el formato original.", example: "Copias un texto de una página web y sale con colores raros. Usa Ctrl+Shift+V y se pega solo el texto, limpio y sin formato extraño.", tip: "Pegar sin formato mantiene tu diseño limpio.", icon: "✨" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para copiar?", opts: ["Ctrl+X", "Ctrl+C", "Ctrl+V", "Ctrl+Z"], ans: 1, type: "mc" },
+                        { q: "Ctrl+V sirve para pegar.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué hace Ctrl+Shift+V?", opts: ["Copiar todo", "Pegar sin formato", "Pegar con formato", "Cortar"], ans: 1, type: "mc" },
+                        { q: "Copiar elimina el texto original.", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" }
+                    ]
+                },
+                8: {
+                    theory: [
+                        { title: "Cortar texto", text: "Cortar (Ctrl+X) remueve el texto seleccionado y lo guarda para pegarlo en otro lugar. Es como 'mover' el texto.", example: "Escribiste un párrafo en el lugar equivocado. Selecciónalo, Ctrl+X (desaparece), ve al lugar correcto y Ctrl+V. ¡Se movió!", tip: "Ctrl+X = Cortar (mover)", icon: "✂️" },
+                        { title: "Diferencia Copiar vs Cortar", text: "Copiar (Ctrl+C) deja el original. Cortar (Ctrl+X) elimina el original. Ambos se pegan con Ctrl+V.", example: "Copiar es como fotocopiar: tienes dos iguales. Cortar es como recortar con tijeras: el original se va y queda solo donde lo pegues.", tip: "Copiar = duplicar, Cortar = mover", icon: "🔄" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para cortar?", opts: ["Ctrl+C", "Ctrl+V", "Ctrl+X", "Ctrl+Z"], ans: 2, type: "mc" },
+                        { q: "Cortar elimina el texto original.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué atajo se usa para pegar lo cortado?", opts: ["Ctrl+P", "Ctrl+V", "Ctrl+Z", "Ctrl+Y"], ans: 1, type: "mc" },
+                        { q: "Copiar y Cortar hacen exactamente lo mismo.", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" }
+                    ]
+                },
+                9: {
+                    theory: [
+                        { title: "Deshacer", text: "¿Cometiste un error? Ctrl+Z deshace la última acción. Puedes presionarlo varias veces para deshacer múltiples pasos.", example: "Borraste un párrafo sin querer. ¡No te preocupes! Presiona Ctrl+Z y vuelve a aparecer como por arte de magia.", tip: "Ctrl+Z = Deshacer. ¡Tu mejor amigo!", icon: "↩️" },
+                        { title: "Rehacer", text: "¿Deshiciste de más? Ctrl+Y rehace lo que deshiciste. También puedes usar Ctrl+Shift+Z.", example: "Presionaste Ctrl+Z muchas veces y ahora falta texto que sí querías. Ctrl+Y lo trae de vuelta paso a paso.", tip: "Ctrl+Y = Rehacer", icon: "↪️" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para deshacer?", opts: ["Ctrl+Y", "Ctrl+Z", "Ctrl+X", "Ctrl+D"], ans: 1, type: "mc" },
+                        { q: "Ctrl+Y sirve para rehacer.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Puedes deshacer múltiples pasos?", opts: ["No, solo el último", "Sí, presionando Ctrl+Z varias veces", "Solo con Ctrl+Y", "No es posible"], ans: 1, type: "mc" },
+                        { q: "Deshacer elimina permanentemente el texto.", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" }
+                    ]
+                },
+                10: {
+                    theory: [
+                        { title: "¡Checkpoint: Edición!", text: "Ya dominas seleccionar, copiar, cortar, pegar, deshacer y rehacer. ¡Eres un editor eficiente!", example: "Ahora puedes mover texto de un lado a otro, duplicar párrafos y corregir errores. ¡Eres como un mago del texto!", tip: "Los atajos de edición son los más usados en Word.", icon: "🏁" },
+                        { title: "Resumen de atajos", text: "Ctrl+C=Copiar, Ctrl+X=Cortar, Ctrl+V=Pegar, Ctrl+Z=Deshacer, Ctrl+Y=Rehacer, Ctrl+A=Seleccionar todo", example: "Imagina que tienes 6 superpoderes: C=clonar, X=cortar, V=pegar, Z=retroceder tiempo, Y=avanzar tiempo, A=atrapar todo.", tip: "Estos atajos funcionan en casi todas las aplicaciones.", icon: "⌨️" }
+                    ], practice: [
+                        { q: "Ctrl+X es para...", opts: ["Copiar", "Cortar", "Pegar", "Cerrar"], ans: 1, type: "mc" },
+                        { q: "¿Qué atajo selecciona todo?", opts: ["Ctrl+S", "Ctrl+E", "Ctrl+A", "Ctrl+T"], ans: 2, type: "mc" },
+                        { q: "Ctrl+Z deshace la última acción.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué hace Ctrl+Shift+V?", opts: ["Pegar con formato", "Copiar formato", "Pegar sin formato", "Cortar"], ans: 2, type: "mc" },
+                        { q: "Doble clic selecciona un párrafo.", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" }
+                    ]
+                }
+            },
+            "2": {
+                1: {
+                    theory: [
+                        { title: "¡Negrita!", text: "La negrita resalta texto haciéndolo más grueso y oscuro. Es el formato más común para títulos y palabras importantes.", example: "Si escribes 'No correr en el pasillo', puedes poner 'No' en negrita así: '\u003cb\u003eNo\u003c/b\u003e correr en el pasillo'. ¡Se nota más!", tip: "Atajo: Ctrl+B (B de Bold)", icon: "🅱️" },
+                        { title: "Cómo aplicar negrita", text: "Selecciona el texto y presiona Ctrl+B, o haz clic en el botón N en la Cinta de opciones (pestaña Inicio).", example: "Selecciona la palabra 'Tarea', presiona Ctrl+B, y verás que se pone más gruesa: Tarea → \u003cb\u003eTarea\u003c/b\u003e. Para quitarla, Ctrl+B otra vez.", tip: "Para quitar negrita, selecciona y presiona Ctrl+B de nuevo.", icon: "✨" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para negrita?", opts: ["Ctrl+N", "Ctrl+B", "Ctrl+G", "Ctrl+D"], ans: 1, type: "mc" },
+                        { q: "La B del atajo viene de 'Bold' (negrita en inglés).", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Dónde está el botón de negrita?", opts: ["Pestaña Insertar", "Pestaña Vista", "Pestaña Inicio", "Pestaña Diseño"], ans: 2, type: "mc" },
+                        { q: "Para quitar negrita se usa un atajo diferente.", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" }
+                    ]
+                },
+                2: {
+                    theory: [
+                        { title: "Cursiva", text: "La cursiva inclina el texto hacia la derecha. Se usa para títulos de obras, palabras en otros idiomas, y énfasis sutil.", example: "El título de tu libro favorito va en cursiva: 'Leí \u003ci\u003eHarry Potter\u003c/i\u003e ayer'. También palabras en inglés: Hice \u003ci\u003ehomework\u003c/i\u003e.", tip: "Atajo: Ctrl+I (I de Italic)", icon: "𝐼" },
+                        { title: "Cuándo usar cursiva", text: "Usa cursiva para: nombres de libros, películas, palabras extranjeras, énfasis leve, y citas textuales.", example: "'Vi la película \u003ci\u003eCoco\u003c/i\u003e y me encantó'. El nombre de la peli va en cursiva, pero tu opinión no.", tip: "No abuses de la cursiva, úsala con moderación.", icon: "📖" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para cursiva?", opts: ["Ctrl+K", "Ctrl+I", "Ctrl+C", "Ctrl+U"], ans: 1, type: "mc" },
+                        { q: "La cursiva inclina el texto hacia la derecha.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Cuál NO es un uso correcto de cursiva?", opts: ["Nombres de libros", "Palabras en otro idioma", "Todo un documento", "Énfasis sutil"], ans: 2, type: "mc" },
+                        { q: "Ctrl+I viene de 'Italic'.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" }
+                    ]
+                },
+                3: {
+                    theory: [
+                        { title: "Subrayado", text: "El subrayado dibuja una línea debajo del texto. Tradicionalmente se usaba para resaltar, pero hoy se prefiere la negrita.", example: "En un examen, puedes subrayar las instrucciones importantes: '\u003cu\u003eLea cuidadosamente\u003c/u\u003e antes de responder'.", tip: "Atajo: Ctrl+U (U de Underline)", icon: "U̲" },
+                        { title: "Estilos de subrayado", text: "Word ofrece diferentes estilos: línea simple, doble, punteado, ondulado, etc. Encuéntralos en el menú desplegable del botón S.", example: "Para una receta puedes usar subrayado ondulado en los ingredientes, y subrayado simple en los pasos. ¡Se ve muy pro!", tip: "Evita subrayar enlaces, puede confundirse con hipervínculos.", icon: "〰️" }
+                    ], practice: [
+                        { q: "¿Cuál es el atajo para subrayado?", opts: ["Ctrl+S", "Ctrl+U", "Ctrl+B", "Ctrl+L"], ans: 1, type: "mc" },
+                        { q: "Hoy en día se prefiere la negrita al subrayado.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "Word solo tiene un estilo de subrayado.", opts: ["Verdadero", "Falso"], ans: 1, type: "tf" },
+                        { q: "¿Por qué se debe evitar subrayar texto normal?", opts: ["Es feo", "Puede confundirse con enlaces", "No se puede imprimir", "Word no lo permite"], ans: 1, type: "mc" }
+                    ]
+                }
+            }
+        };
+
+        // ===== EXCEL CONTENT BANK =====
+        const EXCEL_CONTENT = {
+            "1": {
+                1: {
+                    theory: [
+                        { title: "¡Bienvenido a Excel!", text: "Microsoft Excel es la hoja de cálculo más usada del mundo. Sirve para organizar datos, hacer cálculos y crear gráficos.", example: "Imagina que quieres llevar la cuenta de tus ahorros cada semana. Excel es como un cuaderno mágico que puede sumar todo por ti.", tip: "Lo encontrarás en el menú Inicio o buscando 'Excel'.", icon: "📊" },
+                        { title: "Las partes de Excel", text: "Excel tiene: Cinta de opciones (arriba), Hoja de cálculo con celdas (centro), Barra de fórmulas (arriba del área de trabajo), y Pestañas de hojas (abajo).", example: "La hoja de cálculo es como un tablero de ajedrez: tiene filas (números) y columnas (letras). Cada cuadrito es una celda.", tip: "La Barra de fórmulas muestra lo que hay dentro de cada celda.", icon: "🖥️" },
+                        { title: "Filas, Columnas y Celdas", text: "Las columnas van de A a Z (y más). Las filas van de 1 en adelante. Cada celda tiene una dirección única como A1, B3, C10.", example: "La celda B2 es donde se cruzan la columna B y la fila 2. Es como decir 'fila 2, asiento B' en el cine.", tip: "La celda activa se muestra en el Cuadro de nombres (arriba a la izquierda).", icon: "📍" }
+                    ], practice: [
+                        { q: "¿Qué es Microsoft Excel?", opts: ["Un navegador web", "Un procesador de textos", "Una hoja de cálculo", "Un editor de fotos"], ans: 2, type: "mc" },
+                        { q: "¿Cómo se llama cada cuadrito de la hoja?", opts: ["Pixel", "Celda", "Bloque", "Casilla"], ans: 1, type: "mc" },
+                        { q: "La celda A1 está en la columna A y la fila 1.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué muestra la Barra de fórmulas?", opts: ["El nombre del archivo", "El contenido de la celda activa", "La hora actual", "Los atajos"], ans: 1, type: "mc" }
+                    ]
+                },
+                2: {
+                    theory: [
+                        { title: "Celdas y Rangos", text: "Una celda es un cuadrito individual (ej: A1). Un rango es un grupo de celdas (ej: A1:C3 = desde A1 hasta C3).", example: "Si quieres sumar tus notas de la columna B, del 1 al 5, el rango es B1:B5. Es como decir 'desde la primera nota hasta la quinta'.", tip: "Los rangos se escriben con : (dos puntos) entre la primera y última celda.", icon: "📍" },
+                        { title: "Seleccionar rangos", text: "Haz clic en la primera celda, mantén Shift y haz clic en la última. O simplemente arrastra el mouse.", example: "Para seleccionar de A1 a A10: haz clic en A1, mantén Shift, y haz clic en A10. Todas se pondrán azules.", tip: "Ctrl+Shift+Fin selecciona hasta la última celda con datos.", icon: "🎯" }
+                    ], practice: [
+                        { q: "¿Qué es un rango en Excel?", opts: ["Una fila", "Un grupo de celdas", "Una columna", "Una hoja"], ans: 1, type: "mc" },
+                        { q: "El rango A1:A5 incluye 5 celdas.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué tecla mantienes para seleccionar un rango?", opts: ["Ctrl", "Alt", "Shift", "Tab"], ans: 2, type: "mc" },
+                        { q: "A1:C3 es un rango válido.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" }
+                    ]
+                },
+                3: {
+                    theory: [
+                        { title: "Escribir en Celdas", text: "Haz clic en una celda y empieza a escribir. Presiona Enter para confirmar y bajar, o Tab para confirmar e ir a la derecha.", example: "Haz clic en A1, escribe 'Nombre', presiona Tab, y ahora estás en B1. Escribe 'Edad' y presiona Enter. ¡Ya tienes encabezados!", tip: "Presiona Escape para cancelar lo que estás escribiendo.", icon: "⌨️" },
+                        { title: "Editar una celda", text: "Para editar una celda ya escrita, haz doble clic en ella o presiona F2. El cursor aparecerá dentro del texto.", example: "Escribiste 'Matematicas' sin tilde. Haz doble clic en la celda, pon el cursor después de la 'a' y agrega la tilde: 'Matemáticas'.", tip: "F2 = Editar celda activa.", icon: "✏️" }
+                    ], practice: [
+                        { q: "¿Qué pasa al presionar Enter después de escribir?", opts: ["Se borra el texto", "Confirma y baja a la siguiente fila", "Cierra Excel", "Nada"], ans: 1, type: "mc" },
+                        { q: "Tab mueve a la celda de la derecha.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué tecla edita la celda activa?", opts: ["F1", "F2", "F3", "F4"], ans: 1, type: "mc" },
+                        { q: "Escape cancela la edición de una celda.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" }
+                    ]
+                },
+                4: {
+                    theory: [
+                        { title: "Guardar tu Libro", text: "En Excel los archivos se llaman 'Libros'. Usa Ctrl+S para guardar. El formato es .xlsx.", example: "Hiciste una tabla de gastos. Presiona Ctrl+S, ponle nombre 'Mis_gastos' y guárdalo en tu carpeta. ¡Así no se pierde!", tip: "Ctrl+S = Guardar. ¡Hazlo seguido!", icon: "💾" },
+                        { title: "Guardar Como", text: "F12 abre 'Guardar Como' para crear una copia o cambiar el formato (.xlsx, .csv, .pdf).", example: "Tu profe quiere la tabla en PDF. Presiona F12, cambia el tipo a PDF y guardas. Ahora tienes .xlsx Y .pdf.", tip: "CSV es un formato simple que otros programas pueden leer.", icon: "📁" }
+                    ], practice: [
+                        { q: "¿Cómo se llaman los archivos de Excel?", opts: ["Documentos", "Libros", "Hojas", "Carpetas"], ans: 1, type: "mc" },
+                        { q: "El formato predeterminado de Excel es .xlsx", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Cuál es el atajo para guardar?", opts: ["Ctrl+G", "Ctrl+S", "Ctrl+A", "Alt+S"], ans: 1, type: "mc" },
+                        { q: "F12 abre Guardar Como.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" }
+                    ]
+                },
+                5: {
+                    theory: [
+                        { title: "¡Checkpoint: Repaso!", text: "Ya conoces la interfaz de Excel, las celdas, rangos, cómo escribir datos y guardar tu libro. ¡Increíble!", example: "Ya puedes abrir Excel, escribir datos en celdas, seleccionar rangos y guardar tu trabajo. ¡Eso es un gran inicio!", tip: "Practica creando una tabla con nombres y edades de tu familia.", icon: "🏁" },
+                        { title: "Resumen", text: "Celdas = cuadritos con dirección (A1). Rangos = grupo de celdas (A1:B5). Enter = confirmar. Ctrl+S = guardar.", example: "Piensa en Excel como una ciudad: cada celda es una casa con dirección, los rangos son barrios, y Ctrl+S es tu copia de seguridad.", tip: "Estos conceptos son la base de todo lo que viene.", icon: "⌨️" }
+                    ], practice: [
+                        { q: "¿Qué es una celda?", opts: ["Una fila completa", "Un cuadrito individual con dirección", "Una columna", "Una hoja"], ans: 1, type: "mc" },
+                        { q: "A1:C5 es un rango.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "¿Qué tecla confirma y baja de celda?", opts: ["Tab", "Escape", "Enter", "Shift"], ans: 2, type: "mc" },
+                        { q: "Los archivos de Excel se llaman Libros.", opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                        { q: "El formato de Excel es:", opts: [".docx", ".pptx", ".xlsx", ".pdf"], ans: 2, type: "mc" }
+                    ]
+                }
+            }
+        };
+
+        // ===== FALLBACK CONTENT GENERATOR =====
+        function generateContent(modId, misId) {
+            if (TOOL === 'excel') return generateExcelContent(modId, misId);
+            return generateWordContent(modId, misId);
+        }
+
+        function generateWordContent(modId, misId) {
+            const modNames = { 1: "Fundamentos", 2: "Formato de Texto", 3: "Párrafos", 4: "Insertar Objetos", 5: "Herramientas Pro" };
+            const modTopics = {
+                1: ["interfaz", "documentos", "archivos", "edición", "navegación", "herramientas", "atajos", "ortografía"],
+                2: ["negrita", "cursiva", "subrayado", "fuentes", "colores", "efectos", "formato", "estilos"],
+                3: ["alineación", "interlineado", "viñetas", "listas", "bordes", "columnas", "diseño", "página"],
+                4: ["tablas", "imágenes", "formas", "SmartArt", "encabezados", "enlaces", "símbolos", "gráficos"],
+                5: ["estilos", "revisión", "comentarios", "macros", "plantillas", "PDF", "colaboración", "productividad"]
+            };
+            const topics = modTopics[modId] || modTopics[1];
+            const topic = topics[(misId - 1) % topics.length];
+            return {
+                theory: [
+                    { title: `Aprendiendo ${topic}`, text: `En esta lección aprenderás sobre ${topic} en el contexto de ${modNames[modId]}.`, example: `Por ejemplo, ${topic} te ayuda a trabajar mejor con tus documentos de Word.`, tip: `Practica este concepto en Word para dominarlo.`, icon: "📚" },
+                    { title: `Aplicando ${topic}`, text: `Ahora que conoces la teoría, veamos cómo aplicar ${topic} en tus documentos de Word.`, example: `Intenta usar ${topic} en tu próximo documento para practicar.`, tip: `Recuerda: la práctica hace al maestro.`, icon: "💡" }
+                ],
+                practice: [
+                    { q: `¿En qué módulo estamos aprendiendo?`, opts: [modNames[1], modNames[2], modNames[3], modNames[modId]], ans: 3, type: "mc" },
+                    { q: `Esta lección trata sobre ${topic}.`, opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                    { q: `¿Qué herramienta de Office estamos aprendiendo?`, opts: ["Excel", "PowerPoint", "Word", "Access"], ans: 2, type: "mc" },
+                    { q: `La práctica constante mejora tus habilidades.`, opts: ["Verdadero", "Falso"], ans: 0, type: "tf" }
+                ]
+            };
+        }
+
+        function generateExcelContent(modId, misId) {
+            const modNames = { 1: "Fundamentos", 2: "Formato de Celdas", 3: "Fórmulas Básicas", 4: "Gráficos y Datos", 5: "Funciones Avanzadas" };
+            const modTopics = {
+                1: ["celdas", "rangos", "hojas", "datos", "navegación", "tipos de datos", "autorrelleno", "paneles"],
+                2: ["negrita", "bordes", "colores", "alineación", "combinar", "números", "moneda", "condicional"],
+                3: ["suma", "resta", "multiplicación", "funciones", "referencias", "errores", "fórmulas", "texto"],
+                4: ["gráficos", "barras", "líneas", "filtros", "tablas", "validación", "comentarios", "impresión"],
+                5: ["SI", "BUSCARV", "SUMAR.SI", "fechas", "dinámicas", "protección", "macros", "productividad"]
+            };
+            const topics = modTopics[modId] || modTopics[1];
+            const topic = topics[(misId - 1) % topics.length];
+            return {
+                theory: [
+                    { title: `Aprendiendo ${topic}`, text: `En esta lección aprenderás sobre ${topic} en el contexto de ${modNames[modId]}.`, example: `Por ejemplo, ${topic} te ayuda a trabajar mejor con tus hojas de cálculo.`, tip: `Practica este concepto en Excel para dominarlo.`, icon: "📚" },
+                    { title: `Aplicando ${topic}`, text: `Ahora que conoces la teoría, veamos cómo aplicar ${topic} en tus hojas de Excel.`, example: `Intenta usar ${topic} en tu próximo libro de Excel para practicar.`, tip: `Recuerda: la práctica hace al maestro.`, icon: "💡" }
+                ],
+                practice: [
+                    { q: `¿En qué módulo estamos aprendiendo?`, opts: [modNames[1], modNames[2], modNames[3], modNames[modId]], ans: 3, type: "mc" },
+                    { q: `Esta lección trata sobre ${topic}.`, opts: ["Verdadero", "Falso"], ans: 0, type: "tf" },
+                    { q: `¿Qué herramienta de Office estamos aprendiendo?`, opts: ["Word", "PowerPoint", "Excel", "Access"], ans: 2, type: "mc" },
+                    { q: `La práctica constante mejora tus habilidades.`, opts: ["Verdadero", "Falso"], ans: 0, type: "tf" }
+                ]
+            };
+        }
+
+        function getContent(modId, misId) {
+            const contentBank = TOOL === 'excel' ? EXCEL_CONTENT : CONTENT;
+            const modKey = String(modId);
+            if (contentBank[modKey] && contentBank[modKey][misId]) return contentBank[modKey][misId];
+            return generateContent(modId, misId);
+        }
+
+        // ===== PROGRESS =====
+        function loadProgress() { try { return JSON.parse(localStorage.getItem(`ofilingo_progress_${TOOL}_v2`)) || {}; } catch { return {}; } }
+        function saveProgressData(d) { localStorage.setItem(`ofilingo_progress_${TOOL}_v2`, JSON.stringify(d)); }
+        function loadStats() { try { return JSON.parse(localStorage.getItem('ofilingo_stats')) || { streak: 1, gems: 50, hearts: 5, xp: 0 }; } catch { return { streak: 1, gems: 50, hearts: 5, xp: 0 }; } }
+        function saveStats(s) { localStorage.setItem('ofilingo_stats', JSON.stringify(s)); }
+
+        // ===== APP =====
+        function App() {
+            const content = useMemo(() => getContent(MODULE_ID, MISSION_ID), []);
+            const [phase, setPhase] = useState(PHASE);
+            const [cardIndex, setCardIndex] = useState(0);
+            const [qIndex, setQIndex] = useState(0);
+            const [selected, setSelected] = useState(null);
+            const [status, setStatus] = useState('idle');
+            const [lives, setLives] = useState(5);
+            const [errors, setErrors] = useState(0);
+            const [showResults, setShowResults] = useState(false);
+
+            const cards = content.theory;
+            const questions = content.practice;
+
+            const goBack = () => { window.location.href = 'ofilingo-app.html'; };
+
+            const completeTheory = () => {
+                const progress = loadProgress();
+                const key = `${MODULE_ID}-${MISSION_ID}`;
+                progress[key] = { ...(progress[key] || {}), theoryDone: true };
+                saveProgressData(progress);
+                const stats = loadStats();
+                stats.xp = (stats.xp || 0) + 10;
+                saveStats(stats);
+                goBack();
+            };
+
+            const completePractice = () => {
+                const stars = errors === 0 ? 3 : errors === 1 ? 2 : 1;
+                const xpGain = stars === 3 ? 30 : stars === 2 ? 20 : 10;
+                const progress = loadProgress();
+                const key = `${MODULE_ID}-${MISSION_ID}`;
+                const prevStars = progress[key]?.stars || 0;
+                progress[key] = { ...(progress[key] || {}), completed: true, theoryDone: true, stars: Math.max(prevStars, stars) };
+                saveProgressData(progress);
+                const stats = loadStats();
+                stats.xp = (stats.xp || 0) + xpGain;
+                stats.gems = (stats.gems || 0) + (stars === 3 ? 5 : 2);
+                saveStats(stats);
+                setShowResults({ stars, xpGain });
+            };
+
+            const handleCheck = () => {
+                if (status !== 'idle') {
+                    setStatus('idle'); setSelected(null);
+                    if (qIndex + 1 >= questions.length) { completePractice(); }
+                    else { setQIndex(qIndex + 1); }
+                    return;
+                }
+                if (selected === null) return;
+                const correct = selected === questions[qIndex].ans;
+                if (correct) { setStatus('correct'); }
+                else { setStatus('incorrect'); setErrors(e => e + 1); setLives(l => Math.max(0, l - 1)); }
+            };
+
+            const progressPercent = phase === 'theory'
+                ? ((cardIndex + 1) / cards.length) * 100
+                : ((qIndex + 1) / questions.length) * 100;
+
+            // ===== RESULTS SCREEN =====
+            if (showResults) {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center bg-white p-6">
+                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-center">
+                            <div className="text-6xl mb-4">🎉</div>
+                            <h1 className="text-3xl font-black text-textMain mb-2">¡Misión Completada!</h1>
+                            <p className="text-textGray font-bold mb-6">+{showResults.xpGain} XP</p>
+                            <div className="flex justify-center gap-3 mb-8">
+                                {[1, 2, 3].map(s => (
+                                    <motion.div key={s} initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={{ delay: 0.3 + s * 0.2, type: "spring" }}>
+                                        <StarIcon size={48} fill={s <= showResults.stars ? "#FFC800" : "#E5E5E5"} stroke={s <= showResults.stars ? "#D4A600" : "#CCC"} />
+                                    </motion.div>
+                                ))}
+                            </div>
+                            <p className="text-lg font-bold text-textMain mb-8">
+                                {showResults.stars === 3 ? "¡Perfecto! Sin errores 🌟" : showResults.stars === 2 ? "¡Muy bien! Solo 1 error 👏" : "¡Completado! Sigue practicando 💪"}
+                            </p>
+                            <button onClick={goBack} className="bg-duoGreen text-white font-bold text-lg py-4 px-12 rounded-2xl border-b-4 border-duoGreenDark active-push uppercase tracking-wider">
+                                Continuar
+                            </button>
+                        </motion.div>
+                    </div>
+                );
+            }
+
+            // ===== THEORY PHASE =====
+            if (phase === 'theory') {
+                const card = cards[cardIndex];
+                return (
+                    <div className="min-h-screen flex flex-col bg-white">
+                        {/* Header */}
+                        <div className="w-full max-w-3xl mx-auto px-4 pt-6 flex items-center gap-4">
+                            <button onClick={goBack} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                            </button>
+                            <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <motion.div className="h-full bg-duoGreen rounded-full" animate={{ width: `${progressPercent}%` }} transition={{ type: "spring", stiffness: 50 }}>
+                                    <div className="h-1 bg-white/30 rounded-full mx-1 mt-1" />
+                                </motion.div>
+                            </div>
+                            <span className="text-sm font-bold text-textGray">{cardIndex + 1}/{cards.length}</span>
+                        </div>
+
+                        {/* Card */}
+                        <div className="flex-1 flex items-center justify-center p-4">
+                            <AnimatePresence mode="wait">
+                                <motion.div key={cardIndex} initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -100, opacity: 0 }} transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                                    className="w-full max-w-lg bg-white border-2 border-gray-200 rounded-3xl p-6 sm:p-8 shadow-lg">
+                                    <div className="text-5xl mb-4 text-center">{card.icon}</div>
+                                    <h2 className="text-2xl font-black text-textMain mb-3 text-center">{card.title}</h2>
+                                    <p className="text-base text-textMain leading-relaxed mb-4 text-center">{card.text}</p>
+                                    {card.example && (
+                                        <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 flex items-start gap-3 mb-4">
+                                            <span className="text-xl">📌</span>
+                                            <p className="text-sm font-bold text-green-700">{card.example}</p>
+                                        </div>
+                                    )}
+                                    <div className="bg-blue-50 border-2 border-blue-100 rounded-xl p-4 flex items-start gap-3">
+                                        <span className="text-xl">💡</span>
+                                        <p className="text-sm font-bold text-wordBlue">{card.tip}</p>
+                                    </div>
+                                </motion.div>
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Bottom */}
+                        <div className="w-full max-w-3xl mx-auto px-4 pb-8">
+                            <button onClick={() => {
+                                if (cardIndex + 1 >= cards.length) completeTheory();
+                                else setCardIndex(cardIndex + 1);
+                            }} className="w-full py-4 text-lg bg-duoGreen text-white rounded-2xl font-bold uppercase tracking-wider border-b-4 border-duoGreenDark active-push">
+                                {cardIndex + 1 >= cards.length ? 'Completar Teoría ✓' : 'Continuar →'}
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // ===== PRACTICE PHASE =====
+            const question = questions[qIndex];
+            const isTF = question.type === 'tf';
+
+            return (
+                <div className="min-h-screen flex flex-col bg-white pb-28">
+                    {/* Header */}
+                    <div className="w-full max-w-3xl mx-auto px-4 pt-6 flex items-center gap-4">
+                        <button onClick={goBack} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                        </button>
+                        <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden">
+                            <motion.div className="h-full bg-duoGreen rounded-full" animate={{ width: `${progressPercent}%` }} transition={{ type: "spring", stiffness: 50 }}>
+                                <div className="h-1 bg-white/30 rounded-full mx-1 mt-1" />
+                            </motion.div>
+                        </div>
+                        <motion.div className="flex items-center gap-1 font-bold text-duoRed" key={lives} initial={{ scale: 1.3 }} animate={{ scale: 1 }}>
+                            <HeartIcon filled={lives > 0} /> {lives}
+                        </motion.div>
+                    </div>
+
+                    {/* Question */}
+                    <main className="flex-1 w-full max-w-3xl mx-auto px-4 mt-8">
+                        <AnimatePresence mode="wait">
+                            <motion.div key={qIndex} initial={{ x: 60, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -60, opacity: 0 }}>
+                                <h1 className="text-xl sm:text-2xl font-bold text-textMain mb-8">{question.q}</h1>
+                                <div className={`grid gap-3 ${isTF ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                    {question.opts.map((opt, i) => (
+                                        <motion.button key={i} whileHover={status === 'idle' ? { scale: 1.01 } : {}} whileTap={status === 'idle' ? { scale: 0.98 } : {}}
+                                            onClick={() => status === 'idle' && setSelected(i)}
+                                            className={`p-4 rounded-2xl border-2 border-b-4 font-bold text-left transition-all
+                                        ${status !== 'idle' ? 'cursor-default' : 'cursor-pointer'}
+                                        ${selected === i ? 'border-duoBlue bg-blue-50 text-duoBlue' : 'border-gray-200 hover:bg-gray-50 text-textMain'}
+                                        ${status !== 'idle' && i === question.ans ? 'border-duoGreen bg-green-50 text-duoGreenDark' : ''}
+                                        ${status === 'incorrect' && selected === i ? 'border-duoRed bg-red-50 text-duoRedDark' : ''}
+                                    `}
+                                        >
+                                            <span className="flex items-center gap-3">
+                                                <span className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-black shrink-0
+                                            ${selected === i ? 'border-duoBlue bg-duoBlue text-white' : 'border-gray-300 text-gray-400'}`}>
+                                                    {String.fromCharCode(65 + i)}
+                                                </span>
+                                                {opt}
+                                            </span>
+                                        </motion.button>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </main>
+
+                    {/* Feedback Banner */}
+                    <AnimatePresence>
+                        {status !== 'idle' && (
+                            <motion.div initial={{ y: 200, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 200, opacity: 0 }}
+                                className={`fixed bottom-0 w-full pt-6 pb-24 px-6 border-t-[3px] z-0
+                            ${status === 'correct' ? 'bg-[#D7FFB8] border-[#89E219]' : 'bg-[#FFDFE0] border-[#FF4B4B]'}`}>
+                                <div className="max-w-3xl mx-auto flex items-center gap-4">
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-xl
+                                ${status === 'correct' ? 'bg-duoGreen' : 'bg-duoRed'}`}>
+                                        {status === 'correct' ? '✓' : '✕'}
+                                    </div>
+                                    <div>
+                                        <h2 className={`text-xl font-black ${status === 'correct' ? 'text-duoGreenDark' : 'text-duoRedDark'}`}>
+                                            {status === 'correct' ? '¡Correcto!' : 'Respuesta correcta:'}
+                                        </h2>
+                                        {status === 'incorrect' && <p className="font-bold text-duoRedDark">{question.opts[question.ans]}</p>}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Bottom Button */}
+                    <div className="fixed bottom-0 left-0 right-0 py-5 px-4 z-10 pointer-events-none">
+                        <div className="max-w-3xl mx-auto flex justify-end">
+                            <button onClick={handleCheck} disabled={selected === null && status === 'idle'}
+                                className={`pointer-events-auto w-full sm:w-auto min-w-[200px] uppercase font-extrabold text-lg py-4 px-8 rounded-2xl border-b-4 active-push transition-all
+                            ${status === 'idle' && selected === null ? 'bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed' : ''}
+                            ${status === 'idle' && selected !== null ? 'bg-duoGreen text-white border-duoGreenDark' : ''}
+                            ${status === 'correct' ? 'bg-duoGreen text-white border-duoGreenDark' : ''}
+                            ${status === 'incorrect' ? 'bg-duoRed text-white border-duoRedDark' : ''}
+                        `}>
+                                {status === 'idle' ? 'Comprobar' : 'Continuar'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
